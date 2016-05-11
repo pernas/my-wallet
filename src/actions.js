@@ -1,9 +1,14 @@
 import fetch from 'isomorphic-fetch'
 
 export const UNKNOWN_ACTION     = 'UNKNOWN_ACTION';
+
 export const FETCH_FEES_REQUEST = 'FETCH_FEES_REQUEST';
 export const FETCH_FEES_SUCCESS = 'FETCH_FEES_SUCCESS';
 export const FETCH_FEES_FAILURE = 'FETCH_FEES_FAILURE';
+
+export const SAVE_SCORE = 'SAVE_SCORE';
+export const SAVE_SCORE_SUCCESS = 'SAVE_SCORE_SUCCESS';
+export const SAVE_SCORE_FAILURE = 'SAVE_SCORE_FAILURE';
 
 export function fetchFessSuccess(fees) {
   return {
@@ -47,7 +52,7 @@ export function fetchFees(subreddit) {
     // In this case, we return a promise to wait for.
     // This is not required by thunk middleware, but it is convenient for us.
 
-    return fetch(`https://api.blockchain.info/fees`)
+    return fetch('https://api.blockchain.info/fees')
       .then(response => response.json())
       .then(json =>
 
@@ -59,5 +64,26 @@ export function fetchFees(subreddit) {
 
       // In a real world app, you also want to
       // catch any error in the network call.
+  }
+}
+
+
+function saveScore (score) {
+  return {
+    type: SAVE_SCORE,
+    score
+  }
+}
+
+function saveScoreSucceeded () {
+  return {
+    type: SAVE_SCORE_SUCCEEDED
+  }
+}
+
+function saveScoreFailed (err) {
+  return {
+    type: SAVE_SCORE_FAILED,
+    err
   }
 }
