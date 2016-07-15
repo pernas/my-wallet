@@ -10,7 +10,7 @@ function createRequestTypes(base) {
 
 export const FEES = createRequestTypes('FEES')
 
-
+export const LOAD_FEES = 'LOAD_FEES'
 
 function action(type, payload = {}) {
   return {type, ...payload}
@@ -18,6 +18,8 @@ function action(type, payload = {}) {
 
 export const fees = {
   request: login => action(FEES.REQUEST, {login}),
-  success: (login, response) => action(USER.SUCCESS, {login, response}),
-  failure: (login, error) => action(USER.FAILURE, {login, error}),
+  success: (login, response) => action(FEES.SUCCESS, {login, response}),
+  failure: (login, error) => action(FEES.FAILURE, {login, error}),
 }
+
+export const loadFees = (login, requiredFields = []) => action(LOAD_USER_PAGE, {login, requiredFields})
