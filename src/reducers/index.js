@@ -1,48 +1,44 @@
-import * as Actions from '../actions'
+import { combineReducers } from 'redux-immutable';
+import {Map, fromJS} from 'immutable';
+import { Schema, arrayOf } from 'normalizr';
+
 // import merge from 'lodash/object/merge'
 // import paginate from './paginate'
 // import { combineReducers } from 'redux'
-import { combineReducers } from 'redux-immutable';
-import {Map, fromJS} from 'immutable';
+import * as ActionTypes from '../constants/ActionTypes';
+import * as WalletCrypto from '../WalletCrypto'
+
 
 export const INITIAL_STATE = Map({
-  // fees: Map({})
+  walletState: Map({})
 });
 
-// // Updates an entity cache in response to any action with response.entities.
-// function entities(state = fromJS({ fees: {} }), action) {
-//   if (action.response && action.response.entities) {
-//     return merge({}, state, action.response.entities)
-//   }
-//
-//   return state
-// }
 
-// // Updates error message to notify about the failed fetches.
-// function errorMessage(state = null, action) {
-//   const { type, error } = action
-//
-//   if (type === ActionTypes.RESET_ERROR_MESSAGE) {
-//     return null
-//   } else if (error) {
-//     return action.error
-//   }
-//
-//   return state
-// }
+export default function guid (state = INITIAL_STATE, {type, payload, error}) {
+  switch (type) {
+    case ActionTypes.SET_GUID:
+      return payload;
+    default:
+      return state;
+  }
+}
 
 
-
-export default function fees(state = INITIAL_STATE, action) {
-  // switch (action.type) {
-  // case Actions.FETCH_FEES_SUCCESS:
-  //   return setFees(state, action.fees, action.timestamp);
-  // }
-  return state;
+export default function walletLoader (state = INITIAL_STATE, {type, payload, error}) {
+  switch (type) {
+    case ActionTypes.LOAD_WALLET:
+      if (error)
+        return fromJS({error: payload})
+      else
+        return payload;
+    default:
+      return state;
+  }
 }
 
 const rootReducer = combineReducers({
-  fees
-})
+  walletState: walletLoader,
+  walletState: combineReducers({guid})
+});
 
 export default rootReducer

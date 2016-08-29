@@ -1,41 +1,42 @@
 /* eslint-disable no-constant-condition */
-import { take, put, call, fork, select } from 'redux-saga/effects'
-import { api } from '../services'
+import { take, put, call, fork, select, takeEvery } from 'redux-saga/effects'
 import * as actions from '../actions'
 // import { getUser, getRepo, getStarredByUser, getStargazersByRepo } from '../reducers/selectors'
-
-// each entity defines 3 creators { request, success, failure }
-const { fees } = actions
-
+import { serverSave, walletLoad } from '../actions';
+import * as PersistenceEngine from './persistence/engine';
 
 function* helloSaga() {
   console.log("Hello Saga!")
-  console.log(fees);
-  // while(true) {
-  //   const {fullName} = yield take(actions.LOAD_MORE_STARGAZERS)
-  //   yield fork(loadStargazers, fullName, true)
-  // }
 }
 
 function* byeSaga() {
   console.log("Bye Saga!")
-  // while(true) {
-  //   const {fullName} = yield take(actions.LOAD_MORE_STARGAZERS)
-  //   yield fork(loadStargazers, fullName, true)
-  // }
 }
 
-// load user unless it is cached
-function* loadFees(login, requiredFields) {
-  // const user = yield select(getUser, login)
-  // if (!user || requiredFields.some(key => !user.hasOwnProperty(key))) {
-  //   yield call(fetchUser, login)
-  // }
+
+// function* persistenceSaga() {
+//   while (true) {
+//     const action = yield take();
+//     const state = yield select();
+//     yield put(serverSave.request(action));
+//     yield call(PersistenceEngine.save, state, action);
+//     yield put(serverSave.success());
+//   }
+// }
+
+function* walletLoadSaga() {
+  const action = yield take();
+  yield put(walletLoad.request());
+  const state = yield call(PersistenceEngine.getWallet);
+  yield put(walletLoad.success(state));
 }
+
 
 export default function* root() {
   yield [
-    fork(helloSaga),
-    fork(byeSaga)
+    // fork(helloSaga),
+    // fork(byeSaga),
+    // fork(persistenceSaga),
+    fork(walletLoadSaga)
   ]
 }

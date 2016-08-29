@@ -1,3 +1,3 @@
-import * as _api from './api'
+import * as _http from './http'
 
-export const api = _api
+export const http = _http
