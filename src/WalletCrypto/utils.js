@@ -48,7 +48,7 @@ export const AES = {
     var cipher = crypto.createCipheriv(options.mode || AES.CBC, key, salt || '');
     cipher.setAutoPadding(!options.padding);
 
-    if (options.padding) dataBytes = options.padding.pad(dataBytes, U.BLOCK_BIT_LEN / 8);
+    if (options.padding) dataBytes = options.padding.pad(dataBytes, BLOCK_BIT_LEN / 8);
     var encryptedBytes = Buffer.concat([ cipher.update(dataBytes), cipher.final() ]);
 
     return encryptedBytes;

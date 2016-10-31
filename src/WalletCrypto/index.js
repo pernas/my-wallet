@@ -8,10 +8,12 @@ import { parseJSON } from '../WalletJSON'
 import { fromJS } from 'immutable'
 
 
-// decryptWallet :: Password -> JSON -> Either Error ImmutableWallet
+export const sha256 = (data) => crypto.createHash('sha256').update(data).digest();
+
+
+// decryptWallet :: Password -> payload JSON -> Either Error ImmutableWallet
 export const decryptWallet = curry(
-  (password, data) => parseJSON(data.payload)
-                        .chain(decryptWrapper(password))
+  (password, data) => decryptWrapper(password, data)
                         .chain(parseJSON)
                         .map(fromJS)
 )
@@ -26,6 +28,19 @@ const decryptWrapper = curry(
     }
   }
 )
+
+export const encryptWallet = curry((data, password, pbkdf2Iterations, version) => {
+  assert(data, 'data missing');
+  assert(password, 'password missing');
+  assert(pbkdf2Iterations, 'pbkdf2Iterations missing');
+  assert(version, 'version missing');
+
+  return JSON.stringify({
+    pbkdf2_iterations: pbkdf2Iterations,
+    version: version,
+    payload: encryptDataWithPassword(data, password, pbkdf2Iterations)
+  });
+})
 
 // stretchPassword :: password -> salt -> iterations -> keylen -> Buffer
 function stretchPassword (password, salt, iterations, keylen) {
@@ -73,3 +88,34 @@ function decryptBufferWithKey (payload, iv, key, options) {
   var decryptedBytes = U.AES.decrypt(payload, key, iv, options);
   return decryptedBytes.toString('utf8');
 }
+
+function encryptDataWithPassword (data, password, iterations) {
+  assert(data, 'data missing');
+  assert(password, 'password missing');
+  assert(iterations, 'iterations missing');
+
+  var salt = crypto.randomBytes(U.SALT_BYTES);
+  // Expose stretchPassword for iOS to override
+  var key = stretchPassword(password, salt, iterations, U.KEY_BIT_LEN);
+
+  return encryptDataWithKey(data, key, salt);
+}
+
+// data: e.g. JSON.stringify({...})
+// key: AES key (256 bit Buffer)
+// iv: optional initialization vector
+// returns: concatenated and Base64 encoded iv + payload
+function encryptDataWithKey (data, key, iv) {
+  iv = iv || crypto.randomBytes(U.SALT_BYTES);
+  var dataBytes = new Buffer(data, 'utf8');
+  var options = { mode: U.AES.CBC, padding: U.Iso10126 };
+  var encryptedBytes = U.AES.encrypt(dataBytes, key, iv, options);
+  var payload = Buffer.concat([ iv, encryptedBytes ]);
+  return payload.toString('base64');
+}
+
+export const encryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
+  encryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
+
+export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
+  decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));

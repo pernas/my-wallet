@@ -6,9 +6,8 @@ export const PersistenceType = {
 };
 
 const Whitelist = {
-  [types.CREATE_IMAGE]: PersistenceType.IMMEDIATE,
-  [types.CLEAR_VIEWPORT]: PersistenceType.IMMEDIATE,
-  [types.MOVE_IMAGE]: PersistenceType.DEBOUNCE
+  [types.VERIFY_MNEMONIC]: PersistenceType.IMMEDIATE,
+  [types.UNVERIFY_MNEMONIC]: PersistenceType.DEBOUNCE
 };
 
 export function getPersistenceType(type) {
